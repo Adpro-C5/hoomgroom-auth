@@ -38,6 +38,11 @@ on:
 permissions:
   pull-requests: read # allows SonarCloud to decorate PRs with analysis results
 
+env:
+  PG_HOST: ${{ secrets.PG_HOST }}
+  PG_USER: ${{ secrets.PG_USER }}
+  PG_PASS: ${{ secrets.PG_PASS }}
+
 jobs:
   Analysis:
     runs-on: ubuntu-latest
