@@ -55,7 +55,7 @@ jobs:
 
       - name: Set gradlew as executable
         run: chmod +x ./gradlew
-        
+
       - name: Build with Gradle
         run: ./gradlew build
 
