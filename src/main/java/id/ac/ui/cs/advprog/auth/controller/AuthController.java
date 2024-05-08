@@ -17,11 +17,15 @@ import id.ac.ui.cs.advprog.auth.exceptions.auth.VerificationFailedException;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,46 +33,53 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationFactory<RegisterRequest, RegisterResponse> signUp;
     private final AuthenticationFactory<LoginRequest, LoginResponse> signIn;
+
+    @Autowired
+    private Executor asyncTaskExecutor;
+
     @PostMapping("/sign-up")
-    public synchronized ResponseEntity<RegisterResponse> register (
+    public CompletableFuture<ResponseEntity<RegisterResponse>> register (
             @RequestBody RegisterRequest request
     ) {
-        return ResponseEntity.ok(signUp.responseBuilder(request));
+        return CompletableFuture.supplyAsync(() ->
+            ResponseEntity.ok(signUp.responseBuilder(request)), asyncTaskExecutor);
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<LoginResponse> login (
+    public CompletableFuture<ResponseEntity<LoginResponse>> login (
             @RequestBody LoginRequest request
     ) {
-        return ResponseEntity.ok(signIn.responseBuilder(request));
+        return CompletableFuture.supplyAsync(() ->
+            ResponseEntity.ok(signIn.responseBuilder(request)), asyncTaskExecutor);
     }
 
     @GetMapping("/verify")
     @PreAuthorize("hasAuthority('verify:read')")
-    public ResponseEntity<String> verify () throws JsonProcessingException {
-        try {
-            var user = getCurrentUser();
+    public CompletableFuture<ResponseEntity<String>> verify() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                var user = getCurrentUser();
+                var userDTO = new UserDTO(user.getName(), user.getBirthdate(), user.getGender(), user.getUsername(), user.getEmail(), user.getRole());
+                InformationResponse response = InformationResponse.builder()
+                        .message("Retrieve User Information Successful")
+                        .user(userDTO)
+                        .build();
 
-            var userDTO = new UserDTO(user.getName(), user.getBirthdate(), user.getGender(), user.getUsername(), user.getEmail(), user.getRole());
+                var objectMapper = new ObjectMapper();
+                var module = new SimpleModule();
+                module.addSerializer(UserDTO.class, new UserDTOSerializer());
+                objectMapper.registerModule(module);
 
-            InformationResponse response = InformationResponse.builder()
-                    .message("Retrieve User Information Successful")
-                    .user(userDTO)
-                    .build();
-
-            var objectMapper = new ObjectMapper();
-            var module = new SimpleModule();
-            module.addSerializer(UserDTO.class, new UserDTOSerializer());
-            objectMapper.registerModule(module);
-
-            var jsonString = objectMapper.writeValueAsString(response);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(jsonString);
-        } catch (RuntimeException err) {
-            throw new VerificationFailedException("Your token has expired.");
-        }
+                var jsonString = objectMapper.writeValueAsString(response);
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(jsonString);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("JSON processing failed.", e);
+            } catch (RuntimeException err) {
+                throw new VerificationFailedException("Your token has expired.");
+            }
+        }, asyncTaskExecutor);
     }
 
     private static User getCurrentUser() {
