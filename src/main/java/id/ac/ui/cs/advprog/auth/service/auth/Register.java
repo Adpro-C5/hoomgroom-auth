@@ -19,7 +19,7 @@ public class Register implements AuthenticationFactory<RegisterRequest, Register
 
     @Override
     public synchronized RegisterResponse responseBuilder(RegisterRequest request) {
-        var checkUser = userRepository.findByUsername(request.getUsername()).orElse(null);
+        User checkUser = userRepository.findByUsername(request.getUsername()).orElse(null);
 
         checkIfUserExist(checkUser);
         checkUser = userRepository.findByEmail(request.getEmail()).orElse(null);
@@ -31,7 +31,7 @@ public class Register implements AuthenticationFactory<RegisterRequest, Register
 
     @Override
     public synchronized User generateUser(RegisterRequest request) {
-        var user = User.builder()
+        User user = User.builder()
                 .username(request.getUsername())
                 .active(true)
                 .email(request.getEmail())

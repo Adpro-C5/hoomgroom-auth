@@ -32,7 +32,7 @@ public class UserController {
     ) {
         return CompletableFuture.supplyAsync(() -> {
             ProfileResponse response;
-            var currentUser = getCurrentUser();
+            User currentUser = getCurrentUser();
             
             if (currentUser.getRole().equals("ADMIN")) {
                 response = new AdminProfileTemplate(userRepository).process(currentUser, request);

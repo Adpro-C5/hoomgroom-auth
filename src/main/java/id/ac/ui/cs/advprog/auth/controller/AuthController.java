@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationFactory<RegisterRequest, RegisterResponse> signUp;
@@ -37,7 +37,7 @@ public class AuthController {
     @Autowired
     private Executor asyncTaskExecutor;
 
-    @PostMapping("/sign-up")
+    @PostMapping("/register")
     public CompletableFuture<ResponseEntity<RegisterResponse>> register (
             @RequestBody RegisterRequest request
     ) {
@@ -45,7 +45,7 @@ public class AuthController {
             ResponseEntity.ok(signUp.responseBuilder(request)), asyncTaskExecutor);
     }
 
-    @PostMapping("/sign-in")
+    @PostMapping("/login")
     public CompletableFuture<ResponseEntity<LoginResponse>> login (
             @RequestBody LoginRequest request
     ) {
@@ -58,19 +58,19 @@ public class AuthController {
     public CompletableFuture<ResponseEntity<String>> verify() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                var user = getCurrentUser();
-                var userDTO = new UserDTO(user.getName(), user.getBirthdate(), user.getGender(), user.getUsername(), user.getEmail(), user.getRole());
+                User user = getCurrentUser();
+                UserDTO userDTO = new UserDTO(user.getName(), user.getBirthdate(), user.getGender(), user.getUsername(), user.getEmail(), user.getRole());
                 InformationResponse response = InformationResponse.builder()
                         .message("Retrieve User Information Successful")
                         .user(userDTO)
                         .build();
 
-                var objectMapper = new ObjectMapper();
-                var module = new SimpleModule();
+                ObjectMapper objectMapper = new ObjectMapper();
+                SimpleModule module = new SimpleModule();
                 module.addSerializer(UserDTO.class, new UserDTOSerializer());
                 objectMapper.registerModule(module);
 
-                var jsonString = objectMapper.writeValueAsString(response);
+                String jsonString = objectMapper.writeValueAsString(response);
                 return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(jsonString);

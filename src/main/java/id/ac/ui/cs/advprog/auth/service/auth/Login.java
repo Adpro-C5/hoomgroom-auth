@@ -29,8 +29,8 @@ public class Login implements AuthenticationFactory<LoginRequest, LoginResponse>
                             request.getPassword()
                     )
             );
-            var user = generateUser(request);
-            var jwtToken = jwtService.generateToken(user);
+            User user = generateUser(request);
+            String jwtToken = jwtService.generateToken(user);
             return LoginResponse.builder().message("Sign in successful").token(jwtToken).build();
         } catch ( AuthenticationException error ) {
             throw new IncorrectCredentialException("The credential you provided was incorrect.");

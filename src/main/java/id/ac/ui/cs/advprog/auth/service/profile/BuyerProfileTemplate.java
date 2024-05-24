@@ -26,14 +26,14 @@ public class BuyerProfileTemplate extends ProfileTemplate {
     }
 
     private void checkIfUsernameExist(String username, String currentUsername) {
-        var checkUser = userRepository.findByUsername(username).orElse(null);
+        User checkUser = userRepository.findByUsername(username).orElse(null);
         if (checkUser != null && !currentUsername.equals(username)) {
             throw new UserAlreadyExistException("Username is already used by another user");
         }
     }
 
     private void checkIfEmailExist(String email, String currentEmail) {
-        var checkEmail = userRepository.findByEmail(email).orElse(null);
+        User checkEmail = userRepository.findByEmail(email).orElse(null);
 
         if (checkEmail != null && !currentEmail.equals(email)) {
             throw new UserAlreadyExistException("Email is already used by another user");
