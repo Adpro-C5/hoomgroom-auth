@@ -26,7 +26,7 @@ repositories {
 sonar {
 	properties {
 		property("sonar.projectKey", "Adpro-C5_hoomgroom-auth")
-		property("sonar.organization", "Adpro-C5")
+		property("sonar.organization", "advprog-c5")
 		property("sonar.host.url", "https://sonarcloud.io")
 	}
 }
