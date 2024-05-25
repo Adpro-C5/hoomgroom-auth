@@ -87,38 +87,6 @@ class JwtAuthenticationFilterTest {
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
-    // @Test
-    // void testDoFilterInternal_ValidJwt_UserNotFound() throws ServletException, IOException {
-    //     Cookie[] cookies = { jwtCookie };
-    //     when(request.getCookies()).thenReturn(cookies);
-    //     when(jwtService.extractUsername(anyString())).thenReturn("username");
-    //     when(userDetailsService.loadUserByUsername(anyString())).thenThrow(new UsernameNotFoundException("User not found"));
-
-    //     jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-    //     verify(jwtService, times(1)).extractUsername(jwtCookie.getValue());
-    //     verify(userDetailsService, times(1)).loadUserByUsername("username");
-    //     verify(response, times(1)).addHeader(eq("Set-Cookie"), anyString());
-    //     verify(filterChain, times(1)).doFilter(request, response);
-    // }
-
-    // @Test
-    // void testDoFilterInternal_ValidJwt_InvalidToken() throws ServletException, IOException {
-    //     Cookie[] cookies = { jwtCookie };
-    //     when(request.getCookies()).thenReturn(cookies);
-    //     when(jwtService.extractUsername(anyString())).thenReturn("username");
-    //     when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-    //     when(jwtService.isValid(anyString(), any(UserDetails.class))).thenReturn(false);
-
-    //     jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-    //     verify(jwtService, times(1)).extractUsername(jwtCookie.getValue());
-    //     verify(userDetailsService, times(1)).loadUserByUsername("username");
-    //     verify(jwtService, times(1)).isValid(jwtCookie.getValue(), userDetails);
-    //     verify(response, times(1)).addHeader(eq("Set-Cookie"), anyString());
-    //     verify(filterChain, times(1)).doFilter(request, response);
-    // }
-
     @Test
     void testDoFilterInternal_ValidJwt_ValidToken() throws ServletException, IOException {
         Cookie[] cookies = { jwtCookie };

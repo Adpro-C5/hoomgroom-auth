@@ -90,6 +90,6 @@ class CustomLogoutHandlerTest {
 
         verify(tokenRepository, times(1)).findByToken("sample-token");
         verify(jwtService, times(1)).revokeTokenByUser(user);
-        verify(response, times(1)).addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=None; Path=/; Max-Age=0");
+        verify(response, times(1)).addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
     }
 }
