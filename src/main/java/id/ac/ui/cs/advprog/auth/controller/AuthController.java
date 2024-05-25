@@ -4,8 +4,6 @@ import id.ac.ui.cs.advprog.auth.model.User;
 import id.ac.ui.cs.advprog.auth.model.AuthResponse;
 import id.ac.ui.cs.advprog.auth.service.AuthService;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,9 +27,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @RequestBody User request,
-            HttpServletResponse response
+            @RequestBody User request
     ) {
-        return authService.authenticate(request, response);
+        return authService.authenticate(request);
     }
 }

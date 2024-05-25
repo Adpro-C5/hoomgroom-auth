@@ -4,9 +4,9 @@ import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.service.JwtService;
 import id.ac.ui.cs.advprog.auth.repository.TokenRepository;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -27,27 +27,14 @@ public class CustomLogoutHandler implements LogoutHandler {
         HttpServletResponse response,
         Authentication authentication
     ) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return;
-        }
+        String authHeader = request.getHeader("Authorization");
 
-        String token = null;
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("jwt")) {
-                token = cookie.getValue();
-                break;
-            }
-        }
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) { return; }
 
-        if (token == null) {
-            return;
-        }
-
+        String token = authHeader.substring(7);
         Token storedToken = tokenRepository.findByToken(token).orElse(null);
 
         if (storedToken != null) {
-            response.addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
             jwtService.revokeTokenByUser(storedToken.getUser());
         }
     }

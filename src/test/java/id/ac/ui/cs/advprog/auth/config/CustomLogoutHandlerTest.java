@@ -5,7 +5,6 @@ import id.ac.ui.cs.advprog.auth.model.User;
 import id.ac.ui.cs.advprog.auth.repository.TokenRepository;
 import id.ac.ui.cs.advprog.auth.service.JwtService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +44,8 @@ class CustomLogoutHandlerTest {
     }
 
     @Test
-    void testLogout_NoCookies() {
-        when(request.getCookies()).thenReturn(null);
+    void testLogout_NoAuthorizationHeader() {
+        when(request.getHeader("Authorization")).thenReturn(null);
 
         customLogoutHandler.logout(request, response, authentication);
 
@@ -55,9 +54,8 @@ class CustomLogoutHandlerTest {
     }
 
     @Test
-    void testLogout_NoJwtCookie() {
-        Cookie[] cookies = { new Cookie("other", "value") };
-        when(request.getCookies()).thenReturn(cookies);
+    void testLogout_InvalidAuthorizationHeader() {
+        when(request.getHeader("Authorization")).thenReturn("Invalid token");
 
         customLogoutHandler.logout(request, response, authentication);
 
@@ -67,8 +65,7 @@ class CustomLogoutHandlerTest {
 
     @Test
     void testLogout_TokenNotFound() {
-        Cookie[] cookies = { new Cookie("jwt", "sample-token") };
-        when(request.getCookies()).thenReturn(cookies);
+        when(request.getHeader("Authorization")).thenReturn("Bearer sample-token");
         when(tokenRepository.findByToken("sample-token")).thenReturn(Optional.empty());
 
         customLogoutHandler.logout(request, response, authentication);
@@ -79,8 +76,7 @@ class CustomLogoutHandlerTest {
 
     @Test
     void testLogout_TokenFound() {
-        Cookie[] cookies = { new Cookie("jwt", "sample-token") };
-        when(request.getCookies()).thenReturn(cookies);
+        when(request.getHeader("Authorization")).thenReturn("Bearer sample-token");
         Token token = new Token();
         User user = new User();
         token.setUser(user);
@@ -90,6 +86,5 @@ class CustomLogoutHandlerTest {
 
         verify(tokenRepository, times(1)).findByToken("sample-token");
         verify(jwtService, times(1)).revokeTokenByUser(user);
-        verify(response, times(1)).addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
     }
 }

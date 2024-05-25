@@ -19,28 +19,27 @@ public class ProfileController {
     private ProfileService profileService;
 
     @GetMapping("/profile")
-    public ResponseEntity<ProfileResponse> getProfile(@CookieValue(value = "jwt") String token) {
-        return profileService.getProfile(token);
+    public ResponseEntity<ProfileResponse> getProfile(@RequestHeader(value = "Authorization") String token) {
+        return profileService.getProfile(token.substring(7));
     }
 
     @PutMapping("/profile/password")
-    public ResponseEntity<ProfileResponse> updatePassword(@CookieValue(value = "jwt") String token, @RequestBody ProfilePasswordUpdateRequest request) {
-        return profileService.updatePassword(token, request.getOldPassword(), request.getNewPassword());
+    public ResponseEntity<ProfileResponse> updatePassword(@RequestHeader(value = "Authorization") String token, @RequestBody ProfilePasswordUpdateRequest request) {
+        return profileService.updatePassword(token.substring(7), request.getOldPassword(), request.getNewPassword());
     }
 
     @PutMapping("/profile/address")
-    public ResponseEntity<ProfileResponse> updateAddress(@CookieValue(value = "jwt") String token, @RequestBody ProfileAddressUpdateRequest request) {
-        return profileService.updateAddress(token, request.getNewAddress());
+    public ResponseEntity<ProfileResponse> updateAddress(@RequestHeader(value = "Authorization") String token, @RequestBody ProfileAddressUpdateRequest request) {
+        return profileService.updateAddress(token.substring(7), request.getNewAddress());
     }
 
     @PutMapping("/profile/balance")
-    public ResponseEntity<ProfileResponse> updateBalance(@CookieValue(value = "jwt") String token, @RequestBody ProfileBalanceUpdateRequest request) {
-        return profileService.updateBalance(token, request.getUserId(), request.getAddedBalance());
+    public ResponseEntity<ProfileResponse> updateBalance(@RequestHeader(value = "Authorization") String token, @RequestBody ProfileBalanceUpdateRequest request) {
+        return profileService.updateBalance(token.substring(7), request.getUserId(), request.getAddedBalance());
     }
 
     @DeleteMapping("/profile/delete")
-    public ResponseEntity<ProfileResponse> deleteProfile(@CookieValue(value = "jwt") String token, HttpServletResponse response) {
-        response.addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=None; Path=/; Max-Age=0");
-        return profileService.deleteProfile(token);
+    public ResponseEntity<ProfileResponse> deleteProfile(@RequestHeader(value = "Authorization") String token, HttpServletResponse response) {
+        return profileService.deleteProfile(token.substring(7));
     }
 }
