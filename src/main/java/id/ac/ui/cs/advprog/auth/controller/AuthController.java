@@ -1,36 +1,37 @@
 package id.ac.ui.cs.advprog.auth.controller;
 
-import lombok.RequiredArgsConstructor;
+import id.ac.ui.cs.advprog.auth.model.User;
+import id.ac.ui.cs.advprog.auth.model.AuthResponse;
+import id.ac.ui.cs.advprog.auth.service.AuthService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import id.ac.ui.cs.advprog.auth.dto.auth.LoginRequest;
-import id.ac.ui.cs.advprog.auth.dto.auth.LoginResponse;
-import id.ac.ui.cs.advprog.auth.dto.auth.RegisterRequest;
-import id.ac.ui.cs.advprog.auth.service.AuthenticationService;
-
-import java.util.concurrent.CompletableFuture;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
 public class AuthController {
-    private final AuthenticationService service;
+
+    @Autowired
+    private AuthService authService;
 
     @PostMapping("/register")
-    public CompletableFuture<ResponseEntity<Void>> register(
-            @RequestBody RegisterRequest request
+    public ResponseEntity<AuthResponse> register(
+            @RequestBody User request
     ) {
-        return service.register(request)
-                .thenApply(ResponseEntity::ok);
+        return authService.register(request);
     }
 
     @PostMapping("/login")
-    public CompletableFuture<ResponseEntity<LoginResponse>> login(
-            @RequestBody LoginRequest request
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody User request,
+            HttpServletResponse response
     ) {
-        return service.login(request)
-                .thenApply(ResponseEntity::ok);
+        return authService.authenticate(request, response);
     }
 }

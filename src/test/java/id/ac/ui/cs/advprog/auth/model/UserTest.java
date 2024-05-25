@@ -1,20 +1,16 @@
 package id.ac.ui.cs.advprog.auth.model;
 
-import static org.junit.jupiter.api.Assertions.*;
+import id.ac.ui.cs.advprog.auth.enums.Role;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDate;
 import java.util.Collection;
 
-import id.ac.ui.cs.advprog.auth.enums.Gender;
-import id.ac.ui.cs.advprog.auth.enums.TokenType;
-import id.ac.ui.cs.advprog.auth.enums.UserRole;
-
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
     private User user;
@@ -22,38 +18,135 @@ class UserTest {
     @BeforeEach
     void setUp() {
         user = new User();
+        user.setId(1);
         user.setFullName("John Doe");
-        user.setBirthdate(LocalDate.of(1990, 1, 1));
-        user.setGender(Gender.MALE);
+        user.setBirthDate(LocalDate.of(1990, 1, 1));
+        user.setGender("Male");
         user.setUsername("johndoe");
-        user.setEmail("john.doe@example.com");
-        user.setPassword("password");
-        user.setRole(UserRole.ADMIN);
-        user.setWalletBalance(100.0);
+        user.setEmail("johndoe@example.com");
+        user.setAddress("123 Main St");
+        user.setBalance(1000L);
+        user.setPassword("password123");
+        user.setRole(Role.BUYER);
     }
 
     @Test
-    void testGettersAndSetters() {
+    void testGetId() {
+        assertEquals(1, user.getId());
+    }
+
+    @Test
+    void testSetId() {
+        user.setId(2);
+        assertEquals(2, user.getId());
+    }
+
+    @Test
+    void testGetFullName() {
         assertEquals("John Doe", user.getFullName());
-        assertEquals(LocalDate.of(1990, 1, 1), user.getBirthdate());
-        assertEquals(Gender.MALE, user.getGender());
-        assertEquals("johndoe", user.getRealUsername());
-        assertEquals("john.doe@example.com", user.getEmail());
-        assertEquals("password", user.getPassword());
-        assertEquals(UserRole.ADMIN, user.getRole());
-        assertEquals(100.0, user.getWalletBalance());
+    }
+
+    @Test
+    void testSetFullName() {
+        user.setFullName("Jane Doe");
+        assertEquals("Jane Doe", user.getFullName());
+    }
+
+    @Test
+    void testGetBirthDate() {
+        assertEquals(LocalDate.of(1990, 1, 1), user.getBirthDate());
+    }
+
+    @Test
+    void testSetBirthDate() {
+        LocalDate newDate = LocalDate.of(1991, 2, 2);
+        user.setBirthDate(newDate);
+        assertEquals(newDate, user.getBirthDate());
+    }
+
+    @Test
+    void testGetGender() {
+        assertEquals("Male", user.getGender());
+    }
+
+    @Test
+    void testSetGender() {
+        user.setGender("Female");
+        assertEquals("Female", user.getGender());
+    }
+
+    @Test
+    void testGetUsername() {
+        assertEquals("johndoe", user.getUsername());
+    }
+
+    @Test
+    void testSetUsername() {
+        user.setUsername("janedoe");
+        assertEquals("janedoe", user.getUsername());
+    }
+
+    @Test
+    void testGetEmail() {
+        assertEquals("johndoe@example.com", user.getEmail());
+    }
+
+    @Test
+    void testSetEmail() {
+        user.setEmail("janedoe@example.com");
+        assertEquals("janedoe@example.com", user.getEmail());
+    }
+
+    @Test
+    void testGetAddress() {
+        assertEquals("123 Main St", user.getAddress());
+    }
+
+    @Test
+    void testSetAddress() {
+        user.setAddress("456 Elm St");
+        assertEquals("456 Elm St", user.getAddress());
+    }
+
+    @Test
+    void testGetBalance() {
+        assertEquals(1000L, user.getBalance());
+    }
+
+    @Test
+    void testSetBalance() {
+        user.setBalance(2000L);
+        assertEquals(2000L, user.getBalance());
+    }
+
+    @Test
+    void testGetPassword() {
+        assertEquals("password123", user.getPassword());
+    }
+
+    @Test
+    void testSetPassword() {
+        user.setPassword("newpassword");
+        assertEquals("newpassword", user.getPassword());
+    }
+
+    @Test
+    void testGetRole() {
+        assertEquals(Role.BUYER, user.getRole());
+    }
+
+    @Test
+    void testSetRole() {
+        user.setRole(Role.ADMIN);
+        assertEquals(Role.ADMIN, user.getRole());
     }
 
     @Test
     void testGetAuthorities() {
         Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
+        assertNotNull(authorities);
         assertEquals(1, authorities.size());
-        assertTrue(authorities.contains(new SimpleGrantedAuthority("ADMIN")));
-    }
-
-    @Test
-    void testGetUsername() {
-        assertEquals("john.doe@example.com", user.getUsername());
+        assertTrue(authorities.contains(new SimpleGrantedAuthority(Role.BUYER.name())));
     }
 
     @Test
@@ -74,47 +167,5 @@ class UserTest {
     @Test
     void testIsEnabled() {
         assertTrue(user.isEnabled());
-    }
-
-    @Test
-    void testUserBuilder() {
-        User builtUser = new UserBuilder()
-                .fullName("Jane Doe")
-                .birthdate(LocalDate.of(1992, 2, 2))
-                .gender(Gender.FEMALE)
-                .username("janedoe")
-                .email("jane.doe@example.com")
-                .password("password123")
-                .role(UserRole.PEMBELI)
-                .walletBalance(200.0)
-                .tokens(null)
-                .build();
-
-        assertEquals("Jane Doe", builtUser.getFullName());
-        assertEquals(LocalDate.of(1992, 2, 2), builtUser.getBirthdate());
-        assertEquals(Gender.FEMALE, builtUser.getGender());
-        assertEquals("janedoe", builtUser.getRealUsername());
-        assertEquals("jane.doe@example.com", builtUser.getEmail());
-        assertEquals("password123", builtUser.getPassword());
-        assertEquals(UserRole.PEMBELI, builtUser.getRole());
-        assertEquals(200.0, builtUser.getWalletBalance());
-        assertNull(builtUser.getTokens());
-    }
-
-    @Test
-    void testCanEqual() {
-        User user2 = new User();
-        assertTrue(user.canEqual(user2));
-        assertFalse(user.canEqual(new Object()));
-    }
-
-    @Test
-    void testSetTokens() {
-        Token token1 = new Token("token1", TokenType.BEARER, false, false, user);
-        Token token2 = new Token("token2", TokenType.BEARER, false, false, user);
-        user.setTokens(List.of(token1, token2));
-        assertEquals(2, user.getTokens().size());
-        assertTrue(user.getTokens().contains(token1));
-        assertTrue(user.getTokens().contains(token2));
     }
 }

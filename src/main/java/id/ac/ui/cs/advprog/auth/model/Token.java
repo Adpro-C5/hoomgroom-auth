@@ -1,30 +1,55 @@
 package id.ac.ui.cs.advprog.auth.model;
 
-import id.ac.ui.cs.advprog.auth.enums.TokenType;
-
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Table(name = "_tokens")
 public class Token {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "token")
     private String token;
 
-    @Enumerated(EnumType.STRING)
-    private TokenType tokenType;
+    @Column(name = "is_logged_out")
+    private boolean loggedOut;
 
-    private boolean expired;
-    private boolean revoked;
-
-    @ManyToOne
-    @JoinColumn(name = "user_email")
+    @OneToOne
+    @JoinColumn(name = "user_id")
     private User user;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public boolean isLoggedOut() {
+        return loggedOut;
+    }
+
+    public void setLoggedOut(boolean loggedOut) {
+        this.loggedOut = loggedOut;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

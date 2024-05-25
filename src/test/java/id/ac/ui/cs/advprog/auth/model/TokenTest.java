@@ -1,11 +1,13 @@
 package id.ac.ui.cs.advprog.auth.model;
 
-import static org.junit.jupiter.api.Assertions.*;
+import id.ac.ui.cs.advprog.auth.enums.Role;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
-import id.ac.ui.cs.advprog.auth.enums.TokenType;
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TokenTest {
     private Token token;
@@ -14,68 +16,77 @@ class TokenTest {
     @BeforeEach
     void setUp() {
         user = new User();
-        user.setEmail("john.doe@example.com");
-        
-        token = Token.builder()
-                .token("sample-token")
-                .tokenType(TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
-                .user(user)
-                .build();
+        user.setId(1);
+        user.setFullName("John Doe");
+        user.setBirthDate(LocalDate.of(1990, 1, 1));
+        user.setGender("Male");
+        user.setUsername("johndoe");
+        user.setEmail("johndoe@example.com");
+        user.setAddress("123 Main St");
+        user.setBalance(1000L);
+        user.setPassword("password123");
+        user.setRole(Role.BUYER);
+
+        token = new Token();
+        token.setId(1);
+        token.setToken("sample-token");
+        token.setLoggedOut(false);
+        token.setUser(user);
     }
 
     @Test
-    void testGettersAndSetters() {
+    void testGetId() {
+        assertEquals(1, token.getId());
+    }
+
+    @Test
+    void testSetId() {
+        token.setId(2);
+        assertEquals(2, token.getId());
+    }
+
+    @Test
+    void testGetToken() {
         assertEquals("sample-token", token.getToken());
-        assertEquals(TokenType.BEARER, token.getTokenType());
-        assertFalse(token.isExpired());
-        assertFalse(token.isRevoked());
-        assertEquals(user, token.getUser());
+    }
 
+    @Test
+    void testSetToken() {
         token.setToken("new-token");
-        token.setTokenType(TokenType.BEARER);
-        token.setExpired(true);
-        token.setRevoked(true);
-        token.setUser(null);
-
         assertEquals("new-token", token.getToken());
-        assertEquals(TokenType.BEARER, token.getTokenType());
-        assertTrue(token.isExpired());
-        assertTrue(token.isRevoked());
-        assertNull(token.getUser());
     }
 
     @Test
-    void testNoArgsConstructor() {
-        Token tokenNoArgs = new Token();
-        assertNotNull(tokenNoArgs);
+    void testIsLoggedOut() {
+        assertFalse(token.isLoggedOut());
     }
 
     @Test
-    void testAllArgsConstructor() {
-        Token tokenAllArgs = new Token("all-token", TokenType.BEARER, true, true, user);
-        assertEquals("all-token", tokenAllArgs.getToken());
-        assertEquals(TokenType.BEARER, tokenAllArgs.getTokenType());
-        assertTrue(tokenAllArgs.isExpired());
-        assertTrue(tokenAllArgs.isRevoked());
-        assertEquals(user, tokenAllArgs.getUser());
+    void testSetLoggedOut() {
+        token.setLoggedOut(true);
+        assertTrue(token.isLoggedOut());
     }
 
     @Test
-    void testBuilder() {
-        Token builtToken = Token.builder()
-                .token("built-token")
-                .tokenType(TokenType.BEARER)
-                .expired(false)
-                .revoked(false)
-                .user(user)
-                .build();
+    void testGetUser() {
+        assertEquals(user, token.getUser());
+    }
 
-        assertEquals("built-token", builtToken.getToken());
-        assertEquals(TokenType.BEARER, builtToken.getTokenType());
-        assertFalse(builtToken.isExpired());
-        assertFalse(builtToken.isRevoked());
-        assertEquals(user, builtToken.getUser());
+    @Test
+    void testSetUser() {
+        User newUser = new User();
+        newUser.setId(2);
+        newUser.setFullName("Jane Doe");
+        newUser.setBirthDate(LocalDate.of(1991, 2, 2));
+        newUser.setGender("Female");
+        newUser.setUsername("janedoe");
+        newUser.setEmail("janedoe@example.com");
+        newUser.setAddress("456 Elm St");
+        newUser.setBalance(2000L);
+        newUser.setPassword("newpassword123");
+        newUser.setRole(Role.ADMIN);
+
+        token.setUser(newUser);
+        assertEquals(newUser, token.getUser());
     }
 }
