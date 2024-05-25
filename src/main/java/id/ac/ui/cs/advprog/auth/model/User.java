@@ -1,92 +1,154 @@
 package id.ac.ui.cs.advprog.auth.model;
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
-import java.util.Date;
-import java.util.Collection;
+import id.ac.ui.cs.advprog.auth.enums.Role;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import id.ac.ui.cs.advprog.auth.enums.UserRole;
+import jakarta.persistence.*;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import java.util.List;
+import java.util.Collection;
+import java.time.LocalDate;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "_user")
+@Table(name = "_users")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String name;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date birthdate;
-    
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Column(name = "gender")
     private String gender;
 
-    @Column(unique=true)
-    private String email;
-    @Column(unique=true)
+    @Column(name = "username", unique = true)
     private String username;
 
+    @Column(name = "email", unique = true)
+    private String email;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "balance")
+    private long balance;
+
+    @Column(name = "password")
     private String password;
-    private String role;
-    private boolean active;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (role.equals("ADMIN")) {
-            return UserRole.ADMIN.getGrantedAuthority();
-        } else if (role.equals("BUYER")) {
-            return UserRole.BUYER.getGrantedAuthority();
-        } else {
-            return UserRole.GUEST.getGrantedAuthority();
-        }
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
+    public Integer getId() {
+        return id;
     }
 
-    @Override
-    public String getPassword() {
-        return this.password;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    @Override
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getUsername() {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
     @Override
     public boolean isAccountNonExpired() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.active;
+        return true;
     }
 }

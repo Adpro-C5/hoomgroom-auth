@@ -1,77 +1,79 @@
 package id.ac.ui.cs.advprog.auth.config;
 
-import id.ac.ui.cs.advprog.auth.service.auth.JwtService;
-import id.ac.ui.cs.advprog.auth.exceptions.auth.VerificationFailedException;
-
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
+import id.ac.ui.cs.advprog.auth.service.JwtService;
+import id.ac.ui.cs.advprog.auth.service.UserDetailsImpl;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
 
-    private static final String JWT_HEADER = "Authorization";
-    private static final String JWT_TOKEN_PREFIX = "Bearer ";
+    private final JwtService jwtService;
+    private final UserDetailsImpl userDetailsService;
+
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsImpl userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
-        final String authHeader = request.getHeader(JWT_HEADER);
-        final String token;
-        final String username;
+        @NonNull HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull FilterChain filterChain
+    ) throws ServletException,IOException {
+        Cookie[] cookies = request.getCookies();
 
-        try {
-            if (authHeader == null || !authHeader.startsWith(JWT_TOKEN_PREFIX)) {
-                filterChain.doFilter(request, response);
-                return;
+        if (cookies == null) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+
+        String token = null;
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("jwt")) {
+                token = cookie.getValue();
+                break;
             }
+        }
 
-            token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-
-                if (jwtService.isTokenValid(token, userDetails)) {
+        String username = jwtService.extractUsername(token);
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtService.isValid(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
+                            userDetails, null, userDetails.getAuthorities()
                     );
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                } else {
+                    response.addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=None; Path=/; Max-Age=0");
                 }
+            } catch (Exception e) {
+                response.addHeader("Set-Cookie", "jwt=; HttpOnly; SameSite=None; Path=/; Max-Age=0");
             }
-            filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException exc) {
-            throw new VerificationFailedException("Your token has expired. Please try sign in again.");
-        } catch( SignatureException exc) {
-            throw new VerificationFailedException("Your token signature could not be verified. Please try sign in again.");
-        } catch ( Exception exc ) {
-            throw new VerificationFailedException("We couldn't verify you. Please try sign in again.");
         }
+        filterChain.doFilter(request, response);
     }
 }
