@@ -71,7 +71,7 @@ public class AuthService {
         jwtService.revokeTokenByUser(user);
         Token jwt = jwtService.saveUserToken(user);
 
-        response.addHeader("Set-Cookie", "jwt=" + jwt.getToken() + "; HttpOnly; SameSite=None; Path=/");
+        response.addHeader("Set-Cookie", "jwt=" + jwt.getToken() + "; HttpOnly; SameSite=Lax; Path=/");
         return ResponseEntity.ok(new AuthResponse(jwt.getToken(), "User authenticated successfully"));
     }
 }
