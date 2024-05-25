@@ -1,92 +1,87 @@
 package id.ac.ui.cs.advprog.auth.model;
 
 import lombok.Data;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 
-import java.util.Date;
+import java.util.List;
 import java.util.Collection;
+import java.time.LocalDate;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import id.ac.ui.cs.advprog.auth.enums.Gender;
 import id.ac.ui.cs.advprog.auth.enums.UserRole;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "_user")
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    private String name;
+    private String fullName;
+    private LocalDate birthdate;
 
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date birthdate;
-    
-    private String gender;
-
-    @Column(unique=true)
-    private String email;
-    @Column(unique=true)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private String username;
-
+    @Id
+    private String email;
     private String password;
-    private String role;
-    private boolean active;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+    private double walletBalance;
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Token> tokens;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (role.equals("ADMIN")) {
-            return UserRole.ADMIN.getGrantedAuthority();
-        } else if (role.equals("BUYER")) {
-            return UserRole.BUYER.getGrantedAuthority();
-        } else {
-            return UserRole.GUEST.getGrantedAuthority();
-        }
+    User(UserBuilder builder) {
+        this.fullName = builder.fullName;
+        this.birthdate = builder.birthdate;
+        this.gender = builder.gender;
+        this.username = builder.username;
+        this.email = builder.email;
+        this.password = builder.password;
+        this.role = builder.role;
+        this.walletBalance = builder.walletBalance;
+        this.tokens = builder.tokens;
     }
 
     @Override
-    public String getPassword() {
-        return this.password;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.getValue()));
     }
 
     @Override
     public String getUsername() {
+        return email;
+    }
+
+    public String getRealUsername() {
         return username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.active;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.active;
+        return true;
     }
 }

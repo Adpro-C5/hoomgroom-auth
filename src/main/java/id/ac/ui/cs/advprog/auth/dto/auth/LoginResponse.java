@@ -1,17 +1,17 @@
 package id.ac.ui.cs.advprog.auth.dto.auth;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Generated;
+
+import id.ac.ui.cs.advprog.auth.dto.UserDTO;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Generated
+@NoArgsConstructor
 public class LoginResponse {
-    private String message;
     private String token;
+    private UserDTO userDTO;
 }

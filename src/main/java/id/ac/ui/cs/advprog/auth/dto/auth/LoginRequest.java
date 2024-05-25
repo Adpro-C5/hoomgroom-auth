@@ -1,17 +1,15 @@
 package id.ac.ui.cs.advprog.auth.dto.auth;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Generated;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Generated
+@NoArgsConstructor
 public class LoginRequest {
-    private String username;
-    private String password;
+    private String email;
+    String password;
 }

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - development
       - feat/auth
 
   pull_request:
@@ -73,6 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hoomgroom-auth
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: my-password
