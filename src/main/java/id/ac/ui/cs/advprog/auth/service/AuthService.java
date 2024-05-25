@@ -6,8 +6,6 @@ import id.ac.ui.cs.advprog.auth.model.User;
 import id.ac.ui.cs.advprog.auth.model.AuthResponse;
 import id.ac.ui.cs.advprog.auth.repository.UserRepository;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,7 +52,7 @@ public class AuthService {
         return ResponseEntity.ok(new AuthResponse(null, "User registered successfully"));
     }
 
-    public ResponseEntity<AuthResponse> authenticate(User request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponse> authenticate(User request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -71,7 +69,6 @@ public class AuthService {
         jwtService.revokeTokenByUser(user);
         Token jwt = jwtService.saveUserToken(user);
 
-        response.addHeader("Set-Cookie", "jwt=" + jwt.getToken() + "; HttpOnly; SameSite=Lax; Path=/");
         return ResponseEntity.ok(new AuthResponse(jwt.getToken(), "User authenticated successfully"));
     }
 }

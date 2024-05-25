@@ -6,8 +6,6 @@ import id.ac.ui.cs.advprog.auth.model.User;
 import id.ac.ui.cs.advprog.auth.model.AuthResponse;
 import id.ac.ui.cs.advprog.auth.repository.UserRepository;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +56,7 @@ class AuthServiceTest {
         user.setUsername("johndoe");
         user.setEmail("johndoe@example.com");
         user.setAddress("123 Main St");
-        user.setBalance(1000L);
+        user.setBalance(0L);
         user.setPassword("password123");
         user.setRole(Role.BUYER);
 
@@ -124,10 +122,8 @@ class AuthServiceTest {
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         when(jwtService.saveUserToken(any(User.class))).thenReturn(token);
 
-        HttpServletResponse response = mock(HttpServletResponse.class);
-
         // Act
-        ResponseEntity<AuthResponse> responseEntity = authService.authenticate(user, response);
+        ResponseEntity<AuthResponse> responseEntity = authService.authenticate(user);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());
@@ -137,7 +133,6 @@ class AuthServiceTest {
         assertEquals(token.getToken(), body.getToken());
         verify(jwtService, times(1)).revokeTokenByUser(user);
         verify(jwtService, times(1)).saveUserToken(user);
-        verify(response, times(1)).addHeader(eq("Set-Cookie"), anyString());
     }
 
     @Test
@@ -146,10 +141,8 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        HttpServletResponse response = mock(HttpServletResponse.class);
-
         // Act
-        ResponseEntity<AuthResponse> responseEntity = authService.authenticate(user, response);
+        ResponseEntity<AuthResponse> responseEntity = authService.authenticate(user);
 
         // Assert
         assertEquals(400, responseEntity.getStatusCode().value());

@@ -4,8 +4,6 @@ import id.ac.ui.cs.advprog.auth.model.User;
 import id.ac.ui.cs.advprog.auth.model.AuthResponse;
 import id.ac.ui.cs.advprog.auth.service.AuthService;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,9 +22,6 @@ class AuthControllerTest {
 
     @Mock
     private AuthService authService;
-
-    @Mock
-    private HttpServletResponse response;
 
     @BeforeEach
     void setUp() {
@@ -53,10 +48,10 @@ class AuthControllerTest {
         // Arrange
         User user = new User();
         AuthResponse authResponse = new AuthResponse("token", "User authenticated successfully");
-        when(authService.authenticate(any(User.class), any(HttpServletResponse.class))).thenReturn(ResponseEntity.ok(authResponse));
+        when(authService.authenticate(any(User.class))).thenReturn(ResponseEntity.ok(authResponse));
 
         // Act
-        ResponseEntity<AuthResponse> responseEntity = authController.login(user, response);
+        ResponseEntity<AuthResponse> responseEntity = authController.login(user);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());
