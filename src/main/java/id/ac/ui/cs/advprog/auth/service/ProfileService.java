@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.auth.service;
 
+import id.ac.ui.cs.advprog.auth.enums.TopUpBalance;
 import id.ac.ui.cs.advprog.auth.model.ProfileResponse;
 import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.model.User;
@@ -80,6 +81,10 @@ public class ProfileService {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body(new ProfileResponse("User not found", null, null, null, null, null, null, null, null));
+        }
+
+        if(! TopUpBalance.contains(balance)){
+            return ResponseEntity.badRequest().body(new ProfileResponse("Top up balance amount is invalid", null, null, null, null, null, null, null, null));
         }
 
         user.setBalance(user.getBalance() + balance);
