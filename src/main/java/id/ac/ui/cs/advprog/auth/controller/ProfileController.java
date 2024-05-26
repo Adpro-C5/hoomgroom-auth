@@ -23,6 +23,11 @@ public class ProfileController {
         return profileService.getProfile(token.substring(7));
     }
 
+    @GetMapping("/profile/role")
+    public ResponseEntity<String> getRole(@RequestHeader(value = "Authorization") String token) {
+        return profileService.getRole(token.substring(7));
+    }
+
     @PutMapping("/profile/password")
     public ResponseEntity<ProfileResponse> updatePassword(@RequestHeader(value = "Authorization") String token, @RequestBody ProfilePasswordUpdateRequest request) {
         return profileService.updatePassword(token.substring(7), request.getOldPassword(), request.getNewPassword());

@@ -38,6 +38,18 @@ public class ProfileService {
         return ResponseEntity.ok(new ProfileResponse("User profile retrieved successfully", user.getId(), user.getFullName(), user.getBirthDate(), user.getGender(), user.getUsername(), user.getEmail(), user.getAddress(), user.getBalance()));
     }
 
+    public ResponseEntity<String> getRole(String token) {
+        Token storedToken = tokenRepository.findByToken(token).orElse(null);
+
+        if (storedToken == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        User user = storedToken.getUser();
+
+        return ResponseEntity.ok(user.getRole().toString());
+    }
+
     public ResponseEntity<ProfileResponse> updatePassword(String token, String oldPassword, String newPassword) {
         Token storedToken = tokenRepository.findByToken(token).orElse(null);
 
