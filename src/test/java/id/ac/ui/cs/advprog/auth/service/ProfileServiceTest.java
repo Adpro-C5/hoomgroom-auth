@@ -173,13 +173,29 @@ class ProfileServiceTest {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 
         // Act
-        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 500L);
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 100000);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());
         ProfileResponse body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals("Balance updated successfully", body.getMessage());
+    }
+
+    @Test
+    void testUpdateBalanceInvalidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 33000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Top up balance amount is invalid", body.getMessage());
     }
 
     @Test
