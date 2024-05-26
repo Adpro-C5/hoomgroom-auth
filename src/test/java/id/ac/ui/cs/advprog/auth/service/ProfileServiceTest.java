@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.auth.service;
 
+import id.ac.ui.cs.advprog.auth.enums.Role;
 import id.ac.ui.cs.advprog.auth.model.ProfileResponse;
 import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.model.User;
@@ -52,6 +53,7 @@ class ProfileServiceTest {
         user.setAddress("123 Main St");
         user.setBalance(1000L);
         user.setPassword("password123");
+        user.setRole(Role.BUYER);
 
         token = new Token();
         token.setToken("sample-token");
@@ -87,6 +89,21 @@ class ProfileServiceTest {
         ProfileResponse body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals("Invalid token", body.getMessage());
+    }
+
+    @Test
+    void testGetRole() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+
+        // Act
+        ResponseEntity<String> responseEntity = profileService.getRole("sample-token");
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        String body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals(user.getRole().toString(), body);
     }
 
     @Test

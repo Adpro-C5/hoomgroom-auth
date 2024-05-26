@@ -70,6 +70,20 @@ class ProfileControllerTest {
     }
 
     @Test
+    void testGetRole() {
+        // Arrange
+        String token = "sample-token";
+        when(profileService.getRole(anyString())).thenReturn(ResponseEntity.ok("BUYER"));
+
+        // Act
+        ResponseEntity<String> responseEntity = profileController.getRole(token);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals("BUYER", responseEntity.getBody());
+    }
+
+    @Test
     void testUpdateAddress() {
         // Arrange
         String token = "sample-token";
