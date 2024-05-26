@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.auth.service;
 
+import id.ac.ui.cs.advprog.auth.enums.TopUpBalance;
 import id.ac.ui.cs.advprog.auth.model.ProfileResponse;
 import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.model.User;
@@ -35,6 +36,18 @@ public class ProfileService {
         User user = storedToken.getUser();
 
         return ResponseEntity.ok(new ProfileResponse("User profile retrieved successfully", user.getId(), user.getFullName(), user.getBirthDate(), user.getGender(), user.getUsername(), user.getEmail(), user.getAddress(), user.getBalance()));
+    }
+
+    public ResponseEntity<String> getRole(String token) {
+        Token storedToken = tokenRepository.findByToken(token).orElse(null);
+
+        if (storedToken == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        User user = storedToken.getUser();
+
+        return ResponseEntity.ok(user.getRole().toString());
     }
 
     public ResponseEntity<ProfileResponse> updatePassword(String token, String oldPassword, String newPassword) {
@@ -82,10 +95,34 @@ public class ProfileService {
             return ResponseEntity.badRequest().body(new ProfileResponse("User not found", null, null, null, null, null, null, null, null));
         }
 
+        if(! TopUpBalance.contains(balance)){
+            return ResponseEntity.badRequest().body(new ProfileResponse("Top up balance amount is invalid", null, null, null, null, null, null, null, null));
+        }
+
         user.setBalance(user.getBalance() + balance);
         userRepository.save(user);
 
         return ResponseEntity.ok(new ProfileResponse("Balance updated successfully", null, null, null, null, null, null, null, null));
+    }
+
+    public ResponseEntity<ProfileResponse> reduceBalance(String token, int userId, long balance) {
+        Token storedToken = tokenRepository.findByToken(token).orElse(null);
+
+        if (storedToken == null) {
+            return ResponseEntity.badRequest().body(new ProfileResponse(INVALID_MESSAGE, null, null, null, null, null, null, null, null));
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new ProfileResponse("User not found", null, null, null, null, null, null, null, null));
+        }
+
+        if(balance > 0) return ResponseEntity.badRequest().body(new ProfileResponse("Reduced balance amount shouldn't be more than 0", null, null, null, null, null, null, null, null));
+
+        user.setBalance(user.getBalance() + balance);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ProfileResponse("Balance reduced successfully", null, null, null, null, null, null, null, null));
     }
 
     public ResponseEntity<ProfileResponse> deleteProfile(String token) {

@@ -70,6 +70,20 @@ class ProfileControllerTest {
     }
 
     @Test
+    void testGetRole() {
+        // Arrange
+        String token = "sample-token";
+        when(profileService.getRole(anyString())).thenReturn(ResponseEntity.ok("BUYER"));
+
+        // Act
+        ResponseEntity<String> responseEntity = profileController.getRole(token);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals("BUYER", responseEntity.getBody());
+    }
+
+    @Test
     void testUpdateAddress() {
         // Arrange
         String token = "sample-token";
@@ -95,6 +109,22 @@ class ProfileControllerTest {
 
         // Act
         ResponseEntity<ProfileResponse> responseEntity = profileController.updateBalance(token, request);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals(profileResponse, responseEntity.getBody());
+    }
+
+    @Test
+    void testReduceBalance() {
+        // Arrange
+        String token = "sample-token";
+        ProfileBalanceUpdateRequest request = new ProfileBalanceUpdateRequest(1, 500L);
+        ProfileResponse profileResponse = new ProfileResponse("Balance reduced successfully", null, null, null, null, null, null, null, null);
+        when(profileService.reduceBalance(anyString(), any(Integer.class), any(Long.class))).thenReturn(ResponseEntity.ok(profileResponse));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileController.reduceBalance(token, request);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());

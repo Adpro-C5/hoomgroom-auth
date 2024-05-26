@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.auth.service;
 
+import id.ac.ui.cs.advprog.auth.enums.Role;
 import id.ac.ui.cs.advprog.auth.model.ProfileResponse;
 import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.model.User;
@@ -52,6 +53,7 @@ class ProfileServiceTest {
         user.setAddress("123 Main St");
         user.setBalance(1000L);
         user.setPassword("password123");
+        user.setRole(Role.BUYER);
 
         token = new Token();
         token.setToken("sample-token");
@@ -87,6 +89,21 @@ class ProfileServiceTest {
         ProfileResponse body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals("Invalid token", body.getMessage());
+    }
+
+    @Test
+    void testGetRole() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+
+        // Act
+        ResponseEntity<String> responseEntity = profileService.getRole("sample-token");
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        String body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals(user.getRole().toString(), body);
     }
 
     @Test
@@ -173,13 +190,29 @@ class ProfileServiceTest {
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
 
         // Act
-        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 500L);
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 100000);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());
         ProfileResponse body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals("Balance updated successfully", body.getMessage());
+    }
+
+    @Test
+    void testUpdateBalanceInvalidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 33000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Top up balance amount is invalid", body.getMessage());
     }
 
     @Test
@@ -205,6 +238,71 @@ class ProfileServiceTest {
 
         // Act
         ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 500L);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("User not found", body.getMessage());
+    }
+
+    // ====================================================================================================================
+
+    @Test
+    void testReduceBalance() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, -10000);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Balance reduced successfully", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceInvalidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, 33000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Reduced balance amount shouldn't be more than 0", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceInvalidToken() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("invalid-token", 1, -5000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Invalid token", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceUserNotFound() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, -5000);
 
         // Assert
         assertEquals(400, responseEntity.getStatusCode().value());

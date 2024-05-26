@@ -39,7 +39,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
                                 .permitAll()
-                                .requestMatchers("/profile/balance").hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsImpl)
