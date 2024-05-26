@@ -116,6 +116,22 @@ class ProfileControllerTest {
     }
 
     @Test
+    void testReduceBalance() {
+        // Arrange
+        String token = "sample-token";
+        ProfileBalanceUpdateRequest request = new ProfileBalanceUpdateRequest(1, 500L);
+        ProfileResponse profileResponse = new ProfileResponse("Balance reduced successfully", null, null, null, null, null, null, null, null);
+        when(profileService.reduceBalance(anyString(), any(Integer.class), any(Long.class))).thenReturn(ResponseEntity.ok(profileResponse));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileController.reduceBalance(token, request);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals(profileResponse, responseEntity.getBody());
+    }
+
+    @Test
     void testDeleteProfile() {
         // Arrange
         String token = "sample-token";

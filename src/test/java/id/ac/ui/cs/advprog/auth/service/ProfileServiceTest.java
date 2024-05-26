@@ -246,6 +246,71 @@ class ProfileServiceTest {
         assertEquals("User not found", body.getMessage());
     }
 
+    // ====================================================================================================================
+
+    @Test
+    void testReduceBalance() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, -10000);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Balance reduced successfully", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceInvalidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, 33000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Reduced balance amount shouldn't be more than 0", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceInvalidToken() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("invalid-token", 1, -5000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Invalid token", body.getMessage());
+    }
+
+    @Test
+    void testReduceBalanceUserNotFound() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.reduceBalance("sample-token", 1, -5000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("User not found", body.getMessage());
+    }
+
     @Test
     void testDeleteProfile() {
         // Arrange
