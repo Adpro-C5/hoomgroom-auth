@@ -152,4 +152,38 @@ class AuthServiceTest {
         verify(jwtService, never()).revokeTokenByUser(any(User.class));
         verify(jwtService, never()).saveUserToken(any(User.class));
     }
+
+    @Test
+    void testLogoutSuccess() {
+        // Arrange
+        when(jwtService.extractUsername(anyString())).thenReturn(user.getUsername());
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<AuthResponse> responseEntity = authService.logout(token.getToken());
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        AuthResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("User logged out successfully", body.getMessage());
+        verify(jwtService, times(1)).revokeTokenByUser(user);
+    }
+
+    @Test
+    void testLogoutUserNotFound() {
+        // Arrange
+        when(jwtService.extractUsername(anyString())).thenReturn(user.getUsername());
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<AuthResponse> responseEntity = authService.logout(token.getToken());
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        AuthResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("User not found", body.getMessage());
+        verify(jwtService, never()).revokeTokenByUser(any(User.class));
+    }
 }

@@ -71,4 +71,16 @@ public class AuthService {
 
         return ResponseEntity.ok(new AuthResponse(jwt.getToken(), "User authenticated successfully"));
     }
+
+    public ResponseEntity<AuthResponse> logout(String token) {
+        String userUsername = jwtService.extractUsername(token);
+        User user = repository.findByUsername(userUsername).orElse(null);
+
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new AuthResponse(null, "User not found"));
+        }
+        
+        jwtService.revokeTokenByUser(user);
+        return ResponseEntity.ok(new AuthResponse(null, "User logged out successfully"));
+    }
 }

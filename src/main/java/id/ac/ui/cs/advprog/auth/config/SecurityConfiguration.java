@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,16 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final UserDetailsImpl userDetailsImpl;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomLogoutHandler logoutHandler;
 
     public SecurityConfiguration(
         UserDetailsImpl userDetailsServiceImp,
-        JwtAuthenticationFilter jwtAuthenticationFilter,
-        CustomLogoutHandler logoutHandler
+        JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         this.userDetailsImpl = userDetailsServiceImp;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.logoutHandler = logoutHandler;
     }
 
     @Bean
@@ -41,7 +37,7 @@ public class SecurityConfiguration {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req->req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
+                        req -> req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
                                 .permitAll()
                                 .requestMatchers("/profile/balance").hasAuthority("ADMIN")
                                 .anyRequest()
@@ -51,15 +47,10 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(
-                        e->e.accessDeniedHandler(
+                        e -> e.accessDeniedHandler(
                                         (request, response, accessDeniedException)->response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                                 )
                                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .logout(l->l
-                        .logoutUrl("/logout")
-                        .addLogoutHandler(logoutHandler)
-                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()
-                        ))
                 .build();
     }
 

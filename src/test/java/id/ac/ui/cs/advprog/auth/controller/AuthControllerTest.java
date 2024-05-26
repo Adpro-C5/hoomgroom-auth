@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class AuthControllerTest {
@@ -52,6 +53,21 @@ class AuthControllerTest {
 
         // Act
         ResponseEntity<AuthResponse> responseEntity = authController.login(user);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        assertEquals(authResponse, responseEntity.getBody());
+    }
+
+    @Test
+    void testLogout() {
+        // Arrange
+        String token = "Bearer sample-token";
+        AuthResponse authResponse = new AuthResponse(null, "User logged out successfully");
+        when(authService.logout(anyString())).thenReturn(ResponseEntity.ok(authResponse));
+
+        // Act
+        ResponseEntity<AuthResponse> responseEntity = authController.logout(token);
 
         // Assert
         assertEquals(200, responseEntity.getStatusCode().value());
