@@ -43,6 +43,11 @@ public class ProfileController {
         return profileService.updateBalance(token.substring(7), request.getUserId(), request.getAddedBalance());
     }
 
+    @PutMapping("/profile/balance/reduce")
+    public ResponseEntity<ProfileResponse> reduceBalance(@RequestHeader(value = "Authorization") String token, @RequestBody ProfileBalanceUpdateRequest request) {
+        return profileService.reduceBalance(token.substring(7), request.getUserId(), request.getAddedBalance());
+    }
+
     @DeleteMapping("/profile/delete")
     public ResponseEntity<ProfileResponse> deleteProfile(@RequestHeader(value = "Authorization") String token, HttpServletResponse response) {
         return profileService.deleteProfile(token.substring(7));

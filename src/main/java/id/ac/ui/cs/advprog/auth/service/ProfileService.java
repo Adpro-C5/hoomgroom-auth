@@ -105,6 +105,26 @@ public class ProfileService {
         return ResponseEntity.ok(new ProfileResponse("Balance updated successfully", null, null, null, null, null, null, null, null));
     }
 
+    public ResponseEntity<ProfileResponse> reduceBalance(String token, int userId, long balance) {
+        Token storedToken = tokenRepository.findByToken(token).orElse(null);
+
+        if (storedToken == null) {
+            return ResponseEntity.badRequest().body(new ProfileResponse(INVALID_MESSAGE, null, null, null, null, null, null, null, null));
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new ProfileResponse("User not found", null, null, null, null, null, null, null, null));
+        }
+
+        if(balance > 0) return ResponseEntity.badRequest().body(new ProfileResponse("Reduced balance amount shouldn't be more than 0", null, null, null, null, null, null, null, null));
+
+        user.setBalance(user.getBalance() + balance);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ProfileResponse("Balance reduced successfully", null, null, null, null, null, null, null, null));
+    }
+
     public ResponseEntity<ProfileResponse> deleteProfile(String token) {
         Token storedToken = tokenRepository.findByToken(token).orElse(null);
 
