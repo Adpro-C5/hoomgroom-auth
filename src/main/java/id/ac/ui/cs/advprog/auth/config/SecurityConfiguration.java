@@ -39,8 +39,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
                                 .permitAll()
-                                .anyRequest()
-                                .authenticated()
                 ).userDetailsService(userDetailsImpl)
                 .sessionManagement(session->session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
