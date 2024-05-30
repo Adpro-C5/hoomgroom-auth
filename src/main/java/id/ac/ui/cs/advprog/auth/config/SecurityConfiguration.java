@@ -39,6 +39,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req->req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
                                 .permitAll()
+                                .requestMatchers("/profile/**").hasAnyAuthority("BUYER", "ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsImpl)
@@ -47,7 +48,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(
                         e->e.accessDeniedHandler(
-                                        (request, response, accessDeniedException)->response.setStatus(HttpServletResponse.SC_FORBIDDEN)
+                                        (request, response, accessDeniedException)->response.setStatus(403)
                                 )
                                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .build();
