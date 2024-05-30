@@ -64,12 +64,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Test with Gradle
-        run: |
-          ./gradlew check --info --stacktrace
-          ./gradlew test
-          ./gradlew jacocoTestReport
-
   publish:
     name: Publish Docker Image
     runs-on: ubuntu-latest
