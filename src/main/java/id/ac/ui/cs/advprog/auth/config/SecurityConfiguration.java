@@ -37,7 +37,7 @@ public class SecurityConfiguration {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req -> req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
+                        req->req.requestMatchers("/auth/**", "/", "/actuator", "/actuator/*")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(
-                        e -> e.accessDeniedHandler(
+                        e->e.accessDeniedHandler(
                                         (request, response, accessDeniedException)->response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                                 )
                                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

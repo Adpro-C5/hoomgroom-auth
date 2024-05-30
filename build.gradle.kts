@@ -59,21 +59,18 @@ tasks.withType<Test> {
 }
 
 tasks.test {
-	filter {
-		excludeTestsMatching("*FunctionalTest")
-	}
-
-	finalizedBy(tasks.jacocoTestReport)
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
-
 tasks.jacocoTestReport {
     classDirectories.setFrom(files(classDirectories.files.map {
-        fileTree(it) { exclude("**/*Application**") }
+        fileTree(it) { exclude("**/*Application**", "**/config/**", "**/filter/**") }
     }))
     dependsOn(tasks.test)
-	reports {
-		html.required.set(true)
-		xml.required.set(true)
-		csv.required.set(true)
-	}
+    reports {
+        xml.required = true
+        csv.required.set(false)
+        html.required = true
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
 }

@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.auth.service;
 
 import id.ac.ui.cs.advprog.auth.enums.Role;
+import id.ac.ui.cs.advprog.auth.enums.TopUpBalance;
 import id.ac.ui.cs.advprog.auth.model.ProfileResponse;
 import id.ac.ui.cs.advprog.auth.model.Token;
 import id.ac.ui.cs.advprog.auth.model.User;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,6 +106,19 @@ class ProfileServiceTest {
         String body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals(user.getRole().toString(), body);
+    }
+
+    @Test
+    void testGetRoleInvalidToken() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<String> responseEntity = profileService.getRole("invalid-token");
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        assertNull(responseEntity.getBody());
     }
 
     @Test
@@ -339,5 +354,57 @@ class ProfileServiceTest {
         ProfileResponse body = responseEntity.getBody();
         assertNotNull(body);
         assertEquals("Invalid token", body.getMessage());
+    }
+
+    @Test
+    void testTopUpBalanceEnumValues() {
+        assertEquals(10000, TopUpBalance.TEN.getValue());
+        assertEquals(25000, TopUpBalance.TWENTYFIVE.getValue());
+        assertEquals(50000, TopUpBalance.FIFTY.getValue());
+        assertEquals(100000, TopUpBalance.ONEHUNDRED.getValue());
+    }
+
+    @Test
+    void testTopUpBalanceEnumContains() {
+        assertTrue(TopUpBalance.contains(10000));
+        assertTrue(TopUpBalance.contains(25000));
+        assertTrue(TopUpBalance.contains(50000));
+        assertTrue(TopUpBalance.contains(100000));
+        assertFalse(TopUpBalance.contains(15000));
+        assertFalse(TopUpBalance.contains(0));
+        assertFalse(TopUpBalance.contains(500));
+    }
+
+    @Test
+    void testUpdateBalanceWithValidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 50000);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Balance updated successfully", body.getMessage());
+        assertEquals(1000L + 50000, user.getBalance());  // Asserting the new balance
+    }
+
+    @Test
+    void testUpdateBalanceWithInvalidAmount() {
+        // Arrange
+        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.of(token));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
+
+        // Act
+        ResponseEntity<ProfileResponse> responseEntity = profileService.updateBalance("sample-token", 1, 33000);
+
+        // Assert
+        assertEquals(400, responseEntity.getStatusCode().value());
+        ProfileResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals("Top up balance amount is invalid", body.getMessage());
     }
 }
