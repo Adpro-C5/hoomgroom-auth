@@ -23,10 +23,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody User request) {
-        if (request.getUsername() == null || request.getPassword() == null) {
-            return ResponseEntity.badRequest().body(new AuthResponse(null, "Username or password missing"));
-        }
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody User request
+    ) {
         return authService.authenticate(request);
     }
 
