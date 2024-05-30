@@ -20,6 +20,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,11 +73,12 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void testDoFilterInternal_ValidJwt_ValidToken() throws ServletException, IOException {
+    void testDoFilterInternal_UsernameNotNullAndAuthenticationIsNull() throws ServletException, IOException {
         when(request.getHeader("Authorization")).thenReturn("Bearer sample-token");
         when(jwtService.extractUsername(anyString())).thenReturn("username");
         when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
         when(jwtService.isValid(anyString(), any(UserDetails.class))).thenReturn(true);
+        SecurityContextHolder.getContext().setAuthentication(null);
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
